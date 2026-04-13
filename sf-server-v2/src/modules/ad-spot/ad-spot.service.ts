@@ -16,12 +16,19 @@ export class AdSpotService {
     return this.adSpotRepo.save(adSpot);
   }
 
-  async findAll(position?: string): Promise<AdSpot[]> {
-    const query = this.adSpotRepo.createQueryBuilder('ad_spot')
-      .where('ad_spot.isActive = :isActive', { isActive: true });
+  async findAll(position?: string, activeOnly: boolean = false): Promise<AdSpot[]> {
+    const query = this.adSpotRepo.createQueryBuilder('ad_spot');
+
+    if (activeOnly) {
+      query.where('ad_spot.isActive = :isActive', { isActive: true });
+    }
 
     if (position) {
-      query.andWhere('ad_spot.position = :position', { position });
+      if (activeOnly) {
+        query.andWhere('ad_spot.position = :position', { position });
+      } else {
+        query.where('ad_spot.position = :position', { position });
+      }
     }
 
     return query.getMany();

@@ -25,7 +25,7 @@ export class AdSpotController {
 
   @Get('active')
   findActive(@Query('position') position?: string) {
-    return this.adSpotService.findAll(position);
+    return this.adSpotService.findAll(position, true);
   }
 
   @Post()
@@ -41,7 +41,7 @@ export class AdSpotController {
   @UseGuards(AuthGuard(), RoleGuard)
   @Roles([RolesEnum.ADMIN])
   findAll(@Query('position') position?: string) {
-    return this.adSpotService.findAll(position);
+    return this.adSpotService.findAll(position, false);
   }
 
   @Get(':id')

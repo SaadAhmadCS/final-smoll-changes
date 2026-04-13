@@ -13,6 +13,9 @@ export default defineConfig({
       '/admin': { target: 'http://localhost:3000', changeOrigin: true },
       '/files': { target: 'http://localhost:3000', changeOrigin: true },
       '/specialities': { target: 'http://localhost:3000', changeOrigin: true },
+      '/config': { target: 'http://localhost:3000', changeOrigin: true },
+      '/ad-spots': { target: 'http://localhost:3000', changeOrigin: true },
+      '/orders': { target: 'http://localhost:3000', changeOrigin: true },
     },
   },
   plugins: [vue(), Vuetify({

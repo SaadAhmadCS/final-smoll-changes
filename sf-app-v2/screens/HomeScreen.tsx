@@ -141,7 +141,7 @@ const HomeScreen: React.FC<Props> = (props) => {
               <Text fontSize={"4xl"} fontFamily={fontHauoraBold} color="#111827" mb={4}>
                 smoll®Home
               </Text>
-              <Text fontSize={"lg"} fontFamily={fontHauoraBold} color="#111111" lineHeight={24}>
+              <Text fontSize={"lg"} fontFamily={fontHauoraMedium} color="#111111" lineHeight={24}>
                 Book Home Visits
               </Text>
             </Div>
@@ -163,7 +163,7 @@ const HomeScreen: React.FC<Props> = (props) => {
               <Text fontSize={"4xl"} fontFamily={fontHauoraBold} color="#111827" mb={4}>
                 smoll®Vet
               </Text>
-              <Text fontSize={"lg"} fontFamily={fontHauoraBold} color="#111111" lineHeight={24}>
+              <Text fontSize={"lg"} fontFamily={fontHauoraMedium} color="#111111" lineHeight={24}>
                 Consult over Video
               </Text>
             </Div>

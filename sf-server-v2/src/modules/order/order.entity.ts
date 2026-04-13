@@ -52,6 +52,7 @@ export class Order extends BaseEntity {
     packageId?: string;
     packageLabel?: string;
     addons?: Array<{ id: string; name: string; price: number }>;
+    notes?: string;
     imageUrl?: string;
   }>;
 

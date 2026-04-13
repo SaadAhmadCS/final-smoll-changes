@@ -34,6 +34,7 @@ import { ServiceModule } from './modules/service/service.module';
 import { ProductModule } from './modules/product/product.module';
 import { OrderModule } from './modules/order/order.module';
 import { AdSpotModule } from './modules/ad-spot/ad-spot.module';
+import { AppConfigModule } from './modules/config/config.module';
 import { ClsContextService } from './utils/cls-context.service';
 import { RequestContextMiddleware } from './middleware/request-context.middleware';
 import * as dotenv from 'dotenv';
@@ -91,6 +92,7 @@ const REDIS_ENABLED = process.env.REDIS_ENABLED !== 'false';
     ProductModule,
     OrderModule,
     AdSpotModule,
+    AppConfigModule,
   ],
   providers: [
     {

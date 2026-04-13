@@ -21,10 +21,14 @@ export default defineConfig(() => {
       port: 5176,
       allowedHosts: ['staging-homesuite.smoll.me', 'homesuite.smoll.me'],
       proxy: {
+        '/vet': 'http://localhost:3000',
+        '/vets': 'http://localhost:3000',
+        '/files': 'http://localhost:3000',
+        '/config': 'http://localhost:3000',
         '/api': {
-          target: 'https://staging-api.smoll.me',
+          target: 'http://localhost:3000',
           changeOrigin: true,
-          secure: true,
+          secure: false,
           rewrite: (path) => path.replace(/^\/api/, '')
         }
       }

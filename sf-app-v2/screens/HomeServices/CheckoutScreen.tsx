@@ -34,7 +34,6 @@ function itemLineTotal(item: CartItem): number {
   return base + addonsTotal;
 }
 
-const TRAVEL_FEE = 0;
 
 interface Props {
   navigation: NavigationType;
@@ -46,15 +45,23 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
   const clearCart = useCartStore((s) => s.clearCart);
   const setSchedule = useCartStore((s) => s.setSchedule);
   const schedule = useCartStore((s) => s.schedule);
+  const travelFee = useCartStore((s) => s.travelFee);
+  const shippingFee = useCartStore((s) => s.shippingFee);
+  const fetchAppConfig = useCartStore((s) => s.fetchAppConfig);
   const { user, createPaymentIntent } = useUserStore();
 
   const [btnLoading, setBtnLoading] = useState(false);
 
-  const subtotal = getTotal();
-  const total = subtotal + TRAVEL_FEE;
-
   // Check if cart has services
   const hasServices = items.some(item => item.type === "service");
+  const hasOnlyProducts = items.length > 0 && items.every(item => item.type === "product");
+
+  const subtotal = getTotal();
+  const total = subtotal + (hasServices ? travelFee : (hasOnlyProducts ? shippingFee : 0));
+
+  useEffect(() => {
+    fetchAppConfig();
+  }, []);
 
   useEffect(() => {
     if (items.length === 0) {
@@ -192,6 +199,7 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
             packageId: item.packageId,
             packageLabel: item.packageLabel,
             addons: item.addons,
+            notes: item.notes,
             imageUrl: item.imageUrl,
           })),
           total,
@@ -260,20 +268,41 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
               {items.map((item) => (
                 <Div
                   key={`${item.type}-${item.id}-${item.packageId ?? ""}`}
-                  flexDir="row"
-                  justifyContent="space-between"
-                  alignItems="center"
+                  flexDir="column"
+                  mb={12}
                 >
-                  <Text fontSize={"sm"} fontFamily={fontHauoraMedium} color="#4B5563" flex={1} numberOfLines={1}>
-                    {item.quantity}× {item.title}
-                    {item.packageLabel ? ` (${item.packageLabel})` : ""}
-                  </Text>
-                  <Text fontSize={"sm"} fontFamily={fontHauoraBold} color="#111827">
-                    AED {itemLineTotal(item).toFixed(2)}
-                  </Text>
+                  <Div flexDir="row" justifyContent="space-between" alignItems="center">
+                    <Text fontSize={"sm"} fontFamily={fontHauoraMedium} color="#4B5563" flex={1} numberOfLines={1}>
+                      {item.quantity}× {item.title}
+                      {item.packageLabel ? ` (${item.packageLabel})` : ""}
+                    </Text>
+                    <Text fontSize={"sm"} fontFamily={fontHauoraBold} color="#111827">
+                      AED {(item.unitPrice * item.quantity).toFixed(2)}
+                    </Text>
+                  </Div>
+                  {item.addons && item.addons.map((addon) => (
+                    <Div key={addon.id} flexDir="row" justifyContent="space-between" alignItems="center" ml={16} mt={4}>
+                      <Text fontSize={"sm"} fontFamily={fontHauora} color="#6B7280" flex={1} numberOfLines={1}>
+                        + {addon.name}
+                      </Text>
+                      <Text fontSize={"sm"} fontFamily={fontHauora} color="#6B7280">
+                        AED {(addon.price * item.quantity).toFixed(2)}
+                      </Text>
+                    </Div>
+                  ))}
+                  {item.notes ? (
+                    <Div bg="#F9FAFB" p={10} rounded={8} mt={8}>
+                      <Text fontSize={"xs"} fontFamily={fontHauoraBold} color="#4B5563" mb={2}>
+                        Special Instructions:
+                      </Text>
+                      <Text fontSize={"sm"} fontFamily={fontHauora} color="#6B7280">
+                        {item.notes}
+                      </Text>
+                    </Div>
+                  ) : null}
                 </Div>
               ))}
-              {TRAVEL_FEE > 0 && (
+              {hasServices && travelFee > 0 && (
                 <Div flexDir="row" justifyContent="space-between" alignItems="center">
                   <Div flexDir="row" alignItems="center" style={{ gap: 6 }}>
                     <IconTruck size={16} color="#9CA3AF" />
@@ -282,27 +311,32 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
                     </Text>
                   </Div>
                   <Text fontSize={"sm"} fontFamily={fontHauoraBold} color="#111827">
-                    AED {TRAVEL_FEE.toFixed(2)}
+                    AED {travelFee.toFixed(2)}
                   </Text>
                 </Div>
               )}
-              <Div
+              {hasOnlyProducts && shippingFee > 0 && (
+                <Div flexDir="row" justifyContent="space-between" alignItems="center">
+                  <Div flexDir="row" alignItems="center" style={{ gap: 6 }}>
+                    <IconTruck size={16} color="#9CA3AF" />
+                    <Text fontSize={"sm"} fontFamily={fontHauoraMedium} color="#4B5563">
+                      Shipping fee
+                    </Text>
+                  </Div>
+                  <Text fontSize={"sm"} fontFamily={fontHauoraBold} color="#111827">
+                    AED {shippingFee.toFixed(2)}
+                  </Text>
+                </Div>
+              )}
+              <Div 
+                flexDir="row" 
+                justifyContent="space-between" 
+                alignItems="center"
                 mt={8}
                 pt={12}
                 borderTopWidth={1}
                 borderTopColor="#F3F4F6"
-                flexDir="row"
-                justifyContent="space-between"
-                alignItems="center"
               >
-                <Text fontSize={"sm"} fontFamily={fontHauoraMedium} color="#9CA3AF">
-                  Subtotal
-                </Text>
-                <Text fontSize={"sm"} fontFamily={fontHauoraBold} color="#111827">
-                  AED {subtotal.toFixed(2)}
-                </Text>
-              </Div>
-              <Div flexDir="row" justifyContent="space-between" alignItems="center">
                 <Text fontSize={"md"} fontFamily={fontHauoraBold} color="#111827">
                   Total
                 </Text>

@@ -4,6 +4,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/role.decorator';
 import { RoleGuard } from 'src/guards/role/role.guard';
 import { RolesEnum } from 'src/guards/role/role.enum';
+import { ConfigService as AppConfigService } from '../config/config.service';
 import { IsOptional, IsString, Matches } from 'class-validator';
 
 /** Query DTO for availability (date YYYY-MM-DD) */
@@ -39,11 +40,21 @@ const DEFAULT_SLOTS = [
 @UseGuards(AuthGuard(), RoleGuard)
 @Roles([RolesEnum.MEMBER])
 export class ServiceAvailabilityController {
+  constructor(private readonly configService: AppConfigService) {}
+
   @Get('availability')
-  getAvailability(
+  async getAvailability(
     @Query() query: HomeServiceAvailabilityQueryDto,
-  ): { slots: string[] } {
-    // TODO: integrate with real scheduling by date (query.date)
-    return { slots: DEFAULT_SLOTS };
+  ): Promise<{ slots: string[] }> {
+    const config = await this.configService.getConfig();
+    
+    const daysOff: string[] = config?.homeServiceDaysOff || [];
+    console.log('Incoming date:', query.date, 'Days off:', daysOff);
+    if (query.date && daysOff.includes(query.date)) {
+      return { slots: [] };
+    }
+
+    const slots: string[] = config?.homeServiceSlots?.length > 0 ? config.homeServiceSlots : DEFAULT_SLOTS;
+    return { slots };
   }
 }

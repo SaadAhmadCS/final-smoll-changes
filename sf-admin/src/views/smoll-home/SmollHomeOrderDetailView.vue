@@ -131,9 +131,24 @@
                 </template>
 
                 <template v-slot:subtitle>
-                  <div class="d-flex align-center" style="gap: 12px">
-                    <span class="text-caption text-grey-darken-1">Qty: {{ item.quantity }}</span>
-                    <span class="text-caption text-grey-darken-1">AED {{ item.unitPrice?.toFixed(2) }} each</span>
+                  <div class="d-flex flex-column" style="gap: 8px">
+                    <div class="d-flex align-center mt-1" style="gap: 12px">
+                      <span class="text-caption text-grey-darken-1">Qty: {{ item.quantity }}</span>
+                      <span class="text-caption text-grey-darken-1">AED {{ item.unitPrice?.toFixed(2) }} each</span>
+                      <span v-if="item.packageLabel" class="text-caption text-primary bg-blue-lighten-4 px-2 py-1 rounded">{{ item.packageLabel }}</span>
+                    </div>
+
+                    <div v-if="item.addons && item.addons.length" class="d-flex flex-column mt-1" style="gap: 4px">
+                      <div v-for="addon in item.addons" :key="addon.id" class="d-flex align-center text-caption text-grey-darken-1">
+                        <v-icon icon="mdi-plus" size="14" class="mr-1" />
+                        {{ addon.name }} <span class="ml-1">(+AED {{ addon.price?.toFixed(2) }})</span>
+                      </div>
+                    </div>
+
+                    <div v-if="item.notes" class="mt-1 pa-2 bg-grey-lighten-4 rounded text-caption border">
+                      <div class="font-weight-bold text-grey-darken-2 mb-1">Special Instructions:</div>
+                      <div class="text-grey-darken-1">{{ item.notes }}</div>
+                    </div>
                   </div>
                 </template>
 
@@ -207,6 +222,10 @@ interface OrderItem {
   title: string
   unitPrice: number
   quantity: number
+  packageId?: string
+  packageLabel?: string
+  addons?: Array<{ id: string; name: string; price: number }>
+  notes?: string
   imageUrl?: string
 }
 

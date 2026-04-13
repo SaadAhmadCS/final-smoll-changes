@@ -81,21 +81,26 @@ const ExpertsInboxScreen: React.FC<Props> = ({ navigation }) => {
 
         {activeTab === "Chats" && (
           <Div flex={1}>
-            {experts?.map((expert) => (
-              <ChatInboxItem
-                key={expert.id}
-                onPress={() => handleInboxItemPress(expert.id, expert.name)}
-                title={expert.name}
-                subtitle={expert.designation}
-                loading={actionLoading}
-                image={expert.profileImg?.url ?? "https://via.placeholder.com/150"}
-                expertId={expert.id}
-                verified={expert.verified}
-                about={expert.about}
-                unreadMessageCount={unreadMessages.get(expert.id)}
-                isOnline={expert.isOnline}
-              />
-            ))}
+            <FlatList
+              data={experts ?? []}
+              showsVerticalScrollIndicator={false}
+              keyExtractor={(item) => item.id}
+              style={{ height: "100%" }}
+              renderItem={({ item }) => (
+                <ChatInboxItem
+                  onPress={() => handleInboxItemPress(item.id, item.name)}
+                  title={item.name}
+                  subtitle={item.designation}
+                  loading={actionLoading}
+                  image={item.profileImg?.url ?? "https://via.placeholder.com/150"}
+                  expertId={item.id}
+                  verified={item.verified}
+                  about={item.about}
+                  unreadMessageCount={unreadMessages.get(item.id)}
+                  isOnline={item.isOnline}
+                />
+              )}
+            />
           </Div>
         )}
 

@@ -9,8 +9,8 @@ import {
 import { useCartStore } from "@/store/modules/cart";
 import type { CartItem } from "@/store/types/cart";
 import { NavigationType } from "@/store/types";
-import { IconMinus, IconPlus, IconTrash, IconArrowLeft } from "@tabler/icons-react-native";
-import React from "react";
+import { IconMinus, IconPlus, IconTrash, IconArrowLeft, IconTruck } from "@tabler/icons-react-native";
+import React, { useEffect } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { Div, Text } from "react-native-magnus";
 
@@ -31,12 +31,20 @@ const YourCartScreen: React.FC<Props> = ({ navigation }) => {
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
   const schedule = useCartStore((s) => s.schedule);
+  const travelFee = useCartStore((s) => s.travelFee);
+  const shippingFee = useCartStore((s) => s.shippingFee);
+  const fetchAppConfig = useCartStore((s) => s.fetchAppConfig);
 
-  const total = getTotal();
+  useEffect(() => {
+    fetchAppConfig();
+  }, []);
 
   // Check cart content types
   const hasOnlyProducts = items.length > 0 && items.every(item => item.type === "product");
   const hasServices = items.some(item => item.type === "service");
+
+  const subtotal = getTotal();
+  const total = subtotal + (hasServices ? travelFee : (hasOnlyProducts ? shippingFee : 0));
 
   return (
     <Layout disableHeader>
@@ -143,6 +151,28 @@ const YourCartScreen: React.FC<Props> = ({ navigation }) => {
                 </TouchableOpacity>
               </Div>
 
+              {item.addons && item.addons.map((addon) => (
+                <Div key={addon.id} flexDir="row" justifyContent="space-between" alignItems="center" mb={12}>
+                  <Text fontSize={"sm"} fontFamily={fontHauora} color="#6B7280" flex={1} numberOfLines={1}>
+                    + {addon.name}
+                  </Text>
+                  <Text fontSize={"sm"} fontFamily={fontHauora} color="#6B7280">
+                    AED {(addon.price * item.quantity).toFixed(2)}
+                  </Text>
+                </Div>
+              ))}
+
+              {item.notes ? (
+                <Div bg="#F9FAFB" p={10} rounded={8} mb={16}>
+                  <Text fontSize={"xs"} fontFamily={fontHauoraBold} color="#4B5563" mb={2}>
+                    Special Instructions:
+                  </Text>
+                  <Text fontSize={"sm"} fontFamily={fontHauora} color="#6B7280">
+                    {item.notes}
+                  </Text>
+                </Div>
+              ) : null}
+
               <Div flexDir="row" justifyContent="space-between" alignItems="center">
                 <Div
                   flexDir="row"
@@ -181,6 +211,70 @@ const YourCartScreen: React.FC<Props> = ({ navigation }) => {
               </Div>
             </Div>
           ))
+        )}
+
+        {hasServices && travelFee > 0 && (
+          <Div
+            bg="#FFFFFF"
+            rounded={24}
+            p={20}
+            mb={12}
+            shadow="sm"
+            borderWidth={1}
+            borderColor="#F3F4F6"
+            flexDir="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Div flexDir="row" alignItems="center" style={{ gap: 8 }}>
+              <Div w={40} h={40} rounded={12} bg="#F3F4F6" justifyContent="center" alignItems="center">
+                <IconTruck size={20} color="#6B7280" />
+              </Div>
+              <Div>
+                <Text fontSize={"lg"} fontFamily={fontHauoraBold} color="#1A1A1A">
+                  Travel Fee
+                </Text>
+                <Text fontSize={"sm"} fontFamily={fontHauoraMedium} color="#6B7280" mt={2}>
+                  Applied for home services
+                </Text>
+              </Div>
+            </Div>
+            <Text fontSize={"lg"} fontFamily={fontHauoraBold} color={colorPrimary}>
+              AED {travelFee.toFixed(2)}
+            </Text>
+          </Div>
+        )}
+
+        {hasOnlyProducts && shippingFee > 0 && (
+          <Div
+            bg="#FFFFFF"
+            rounded={24}
+            p={20}
+            mb={12}
+            shadow="sm"
+            borderWidth={1}
+            borderColor="#F3F4F6"
+            flexDir="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Div flexDir="row" alignItems="center" style={{ gap: 8 }}>
+              <Div w={40} h={40} rounded={12} bg="#F3F4F6" justifyContent="center" alignItems="center">
+                <IconTruck size={20} color="#6B7280" />
+              </Div>
+              <Div>
+                <Text fontSize={"lg"} fontFamily={fontHauoraBold} color="#1A1A1A">
+                  Shipping Fee
+                </Text>
+                <Text fontSize={"sm"} fontFamily={fontHauoraMedium} color="#6B7280" mt={2}>
+                  Applied for product orders
+                </Text>
+              </Div>
+            </Div>
+            <Text fontSize={"lg"} fontFamily={fontHauoraBold} color={colorPrimary}>
+              AED {shippingFee.toFixed(2)}
+            </Text>
+          </Div>
         )}
 
         <Div h={140} />

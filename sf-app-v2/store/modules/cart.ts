@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CartItem, CartItemType, CartState } from "../types/cart";
+import api from "@/utils/api";
 
 /** Cart expires after 3 days (in milliseconds). */
 const CART_EXPIRY_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
@@ -19,6 +20,27 @@ export const useCartStore = create<CartState>()(
       items: [],
       schedule: null,
       cartUpdatedAt: null,
+      discount: 0,
+      promoCode: null,
+      travelFee: 79,
+      shippingFee: 0,
+
+      fetchAppConfig: async () => {
+        try {
+          const res = await api.get("/config");
+          const data = res.data;
+          if (data) {
+            if (data.travelFee !== undefined) {
+              set({ travelFee: data.travelFee });
+            }
+            if (data.shippingFee !== undefined) {
+              set({ shippingFee: data.shippingFee });
+            }
+          }
+        } catch (e) {
+          console.error("Failed to fetch app config", e);
+        }
+      },
 
       addOrUpdateItem: (itemInput) => {
         const { items } = get();
@@ -117,6 +139,10 @@ export const useCartStore = create<CartState>()(
         items: state.items,
         schedule: state.schedule,
         cartUpdatedAt: state.cartUpdatedAt,
+        discount: state.discount,
+        promoCode: state.promoCode,
+        travelFee: state.travelFee,
+        shippingFee: state.shippingFee,
       }),
       onRehydrateStorage: () => {
         return (state, error) => {

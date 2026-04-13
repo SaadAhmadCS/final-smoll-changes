@@ -18,7 +18,7 @@ export function buildUpcomingDates(count: number): DatePill[] {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     days.push({
-      id: d.toISOString().slice(0, 10),
+      id: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
       labelTop: WEEKDAYS[d.getDay()],
       labelBottom: String(d.getDate()),
     });

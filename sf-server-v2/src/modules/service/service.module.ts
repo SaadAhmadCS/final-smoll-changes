@@ -5,9 +5,10 @@ import { ServiceService } from './service.service';
 import { ServiceController } from './service.controller';
 import { ServiceMemberController } from './service.member.controller';
 import { ServiceAvailabilityController } from './service.availability.controller';
+import { AppConfigModule } from '../config/config.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Service])],
+  imports: [TypeOrmModule.forFeature([Service]), AppConfigModule],
   controllers: [
     ServiceController,
     ServiceMemberController,

@@ -41,6 +41,7 @@ import HomeVetsView from '@/views/smoll-home/HomeVetsView.vue'
 import AddHomeVetView from '@/views/smoll-home/AddHomeVetView.vue'
 import HomeVetInfoView from '@/views/smoll-home/HomeVetInfoView.vue'
 import SmollHomeAddVisitView from '@/views/smoll-home/SmollHomeAddVisitView.vue'
+import SmollHomeSettingsView from '@/views/smoll-home/SmollHomeSettingsView.vue'
 
 // Smoll role-based imports (separate from Vet Admin)
 import SmollCustomerLayout from '@/components/smoll-roles/SmollCustomerLayout.vue'
@@ -342,6 +343,11 @@ const router = createRouter({
           path: 'visits/:id',
           component: SmollHomeVisitDetailView,
           meta: { title: 'Vet Admin / Visit Details' }
+        },
+        {
+          path: 'settings',
+          component: SmollHomeSettingsView,
+          meta: { title: 'Vet Admin / Settings' }
         },
       ]
     },

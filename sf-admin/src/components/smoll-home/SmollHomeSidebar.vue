@@ -74,7 +74,8 @@ const navItems = [
   { title: 'Sponsored Ads', icon: 'mdi-bullhorn', to: '/smoll-home/ads' },
   { title: 'Customers', icon: 'mdi-account-group', to: '/smoll-home/customers' },
   { title: 'Veterinaries', icon: 'mdi-stethoscope', to: '/smoll-home/veterinarians' },
-  { title: 'Finance', icon: 'mdi-chart-line', to: '/smoll-home/finance' }
+  { title: 'Finance', icon: 'mdi-chart-line', to: '/smoll-home/finance' },
+  { title: 'Settings', icon: 'mdi-cog', to: '/smoll-home/settings' }
 ]
 </script>
 

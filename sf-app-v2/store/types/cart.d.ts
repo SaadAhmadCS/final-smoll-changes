@@ -42,7 +42,11 @@ export interface CartState {
   schedule: Nullable<ScheduleSelection>;
   /** Timestamp (ms) of the last cart modification. Used for 3-day expiry. */
   cartUpdatedAt: number | null;
-
+  discount: number;
+  promoCode: string | null;
+  travelFee: number;
+  shippingFee: number;
+  
   addOrUpdateItem: (item: Omit<CartItem, "quantity"> & { quantity?: number }) => void;
   /** Remove one cart line. Use packageId when same id+type can appear with different packages (e.g. product sizes). */
   removeItem: (id: string, type: CartItemType, packageId?: string) => void;
@@ -56,4 +60,7 @@ export interface CartState {
   getTotal: () => number;
   /** Check if adding a specific item type is allowed based on current cart content. */
   canAdd: (type: CartItemType) => boolean;
+  
+  /** Fetch external configuration to dynamically calculate fees. */
+  fetchAppConfig: () => Promise<void>;
 }
