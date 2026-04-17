@@ -47,14 +47,28 @@ export class ServiceAvailabilityController {
     @Query() query: HomeServiceAvailabilityQueryDto,
   ): Promise<{ slots: string[] }> {
     const config = await this.configService.getConfig();
-    
+
     const daysOff: string[] = config?.homeServiceDaysOff || [];
-    console.log('Incoming date:', query.date, 'Days off:', daysOff);
-    if (query.date && daysOff.includes(query.date)) {
+    const overrides: Record<string, string[]> =
+      config?.homeServiceOverrides || {};
+
+    const requestedDate = query.date;
+
+    // 1) If the date is explicitly marked as a full day off, return no slots.
+    if (requestedDate && daysOff.includes(requestedDate)) {
       return { slots: [] };
     }
 
-    const slots: string[] = config?.homeServiceSlots?.length > 0 ? config.homeServiceSlots : DEFAULT_SLOTS;
+    // 2) If there is a per-date override, use those slots instead of defaults.
+    if (requestedDate && Array.isArray(overrides[requestedDate])) {
+      return { slots: overrides[requestedDate] };
+    }
+
+    // 3) Fallback to default/global slots.
+    const slots: string[] =
+      config?.homeServiceSlots?.length > 0
+        ? config.homeServiceSlots
+        : DEFAULT_SLOTS;
     return { slots };
   }
 }

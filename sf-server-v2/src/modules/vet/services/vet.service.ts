@@ -315,9 +315,12 @@ export class VetService {
     query: FindConsultationsForVetQueryDto,
   ): Promise<PaginationResult<VetConsultation>> {
     const { type, isCompleted, ...pageQuery } = query;
+    const currentVet = await this.vetRepo.findOne({
+      where: { id: user.id },
+      select: { id: true, isHomeVet: true },
+    });
 
-    const where: FindOptionsWhere<VetConsultation> = {
-      vet: { id: user.id },
+    const baseWhere: FindOptionsWhere<VetConsultation> = {
       ...(isCompleted
         ? {}
         : {
@@ -328,22 +331,53 @@ export class VetService {
           }),
     };
 
+    const where: FindOptionsWhere<VetConsultation> | FindOptionsWhere<VetConsultation>[] =
+      currentVet?.isHomeVet
+        ? [
+            { ...baseWhere, vet: { id: user.id } as any },
+            { ...baseWhere, vet: IsNull() as any },
+          ]
+        : {
+            ...baseWhere,
+            vet: { id: user.id },
+          };
+
     switch (type) {
       case ConsultationTypeEnum.SCHEDULED:
-        where.scheduledAt = Not(IsNull());
-        where.status = ConsultationStatusEnum.SCHEDULED;
+        if (Array.isArray(where)) {
+          where.forEach((entry) => {
+            entry.scheduledAt = Not(IsNull());
+            entry.status = ConsultationStatusEnum.SCHEDULED;
+          });
+        } else {
+          where.scheduledAt = Not(IsNull());
+          where.status = ConsultationStatusEnum.SCHEDULED;
+        }
         break;
       case ConsultationTypeEnum.INSTANT:
-        where.scheduledAt = IsNull();
+        if (Array.isArray(where)) {
+          where.forEach((entry) => {
+            entry.scheduledAt = IsNull();
+          });
+        } else {
+          where.scheduledAt = IsNull();
+        }
         break;
     }
 
     if (isCompleted) {
-      where.status = In([
+      const completedStatuses = In([
         ConsultationStatusEnum.COMPLETED,
         ConsultationStatusEnum.INITIATED,
         ConsultationStatusEnum.REJECTED,
       ]);
+      if (Array.isArray(where)) {
+        where.forEach((entry) => {
+          entry.status = completedStatuses;
+        });
+      } else {
+        where.status = completedStatuses;
+      }
     }
 
     const findOptions: FindManyOptions<VetConsultation> = {
@@ -512,13 +546,31 @@ export class VetService {
     user: AuthUser,
     id: string,
   ): Promise<VetConsultation> {
-    return this.vetConsultationRepo.findOne({
-      where: {
-        id,
-        vet: {
-          id: user.id,
-        },
-      },
+    const currentVet = await this.vetRepo.findOne({
+      where: { id: user.id },
+      select: { id: true, isHomeVet: true },
+    });
+
+    const consultation = await this.vetConsultationRepo.findOne({
+      where: currentVet?.isHomeVet
+        ? [
+            {
+              id,
+              vet: {
+                id: user.id,
+              },
+            },
+            {
+              id,
+              vet: IsNull() as any,
+            },
+          ]
+        : {
+            id,
+            vet: {
+              id: user.id,
+            },
+          },
       relations: {
         member: true,
         case: {
@@ -528,6 +580,12 @@ export class VetService {
         },
       },
     });
+
+    if (!consultation) {
+      throw new NotFoundException(`Consultation with id "${id}" not found`);
+    }
+
+    return consultation;
   }
 
   /**
@@ -650,6 +708,12 @@ export class VetService {
     ) {
       throw new BadRequestException('Only pending/scheduled consultations can be accepted');
     }
+    const vetEntity = await this.findOne(vet.id);
+    consultation.vet = vetEntity;
+    if (consultation.case) {
+      consultation.case.assignedVet = vetEntity as any;
+      await this.caseRepo.save(consultation.case);
+    }
     consultation.acceptedAt = new Date();
     await this.vetConsultationRepo.save(consultation);
     return consultation;
@@ -663,6 +727,8 @@ export class VetService {
     ) {
       throw new BadRequestException('Only pending/scheduled consultations can be rejected');
     }
+    const vetEntity = await this.findOne(vet.id);
+    consultation.vet = vetEntity;
     consultation.status = ConsultationStatusEnum.REJECTED;
     consultation.rejectedByVetName = vet.name;
     await this.vetConsultationRepo.save(consultation);

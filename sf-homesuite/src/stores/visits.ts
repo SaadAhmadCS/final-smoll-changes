@@ -171,8 +171,8 @@ export const useVisitsStore = defineStore('VisitsStore', {
       await api.post(`/vet/cases/${caseId}/customer-not-reachable`)
     },
 
-    async closeCase(caseId: string) {
-      await api.post(`/vet/cases/${caseId}/close`)
+    async closeCase(caseId: string, note: string) {
+      await api.post(`/vet/cases/${caseId}/close`, { note })
     },
 
     async fetchCalendar(startDate: string, type?: 'monthly' | 'weekly') {

@@ -15,11 +15,11 @@ export class ConfigService implements OnModuleInit {
     // Ensure the default settings are seeded
     let settings = await this.configRepo.findOne({ where: { key: 'settings' } });
     if (!settings) {
-      settings = this.configRepo.create({ 
-        key: 'settings', 
-        value: { 
-          travelFee: 79.00, 
-          shippingFee: 10.00,
+      settings = this.configRepo.create({
+        key: 'settings',
+        value: {
+          travelFee: 79.0,
+          shippingFee: 10.0,
           homeServiceSlots: [
             '09:00 AM',
             '10:00 AM',
@@ -31,18 +31,22 @@ export class ConfigService implements OnModuleInit {
             '04:00 PM',
             '05:00 PM',
           ],
-          homeServiceDaysOff: []
-        } 
+          homeServiceDaysOff: [],
+          // Per-date overrides: { [YYYY-MM-DD]: string[] }
+          homeServiceOverrides: {},
+        },
       });
       await this.configRepo.save(settings);
     }
   }
 
   async getConfig(): Promise<any> {
-    const settings = await this.configRepo.findOne({ where: { key: 'settings' } });
-    const defaults = { 
-      travelFee: 79.00, 
-      shippingFee: 10.00,
+    const settings = await this.configRepo.findOne({
+      where: { key: 'settings' },
+    });
+    const defaults = {
+      travelFee: 79.0,
+      shippingFee: 10.0,
       homeServiceSlots: [
         '09:00 AM',
         '10:00 AM',
@@ -54,7 +58,8 @@ export class ConfigService implements OnModuleInit {
         '04:00 PM',
         '05:00 PM',
       ],
-      homeServiceDaysOff: []
+      homeServiceDaysOff: [],
+      homeServiceOverrides: {},
     };
     return { ...defaults, ...(settings?.value || {}) };
   }

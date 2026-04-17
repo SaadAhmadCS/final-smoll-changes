@@ -26,6 +26,28 @@ const MONTH_NAMES = [
 
 const DATE_PILLS = buildUpcomingDates(7);
 
+function parseSlotToDate(baseDateId: string, slot: string): Date | null {
+  // Expected format: e.g. "9:00 AM"
+  const match = slot.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return null;
+
+  const [, hh, mm, meridiemRaw] = match;
+  let hours = Number(hh);
+  const minutes = Number(mm);
+  const meridiem = meridiemRaw.toUpperCase();
+
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+
+  if (meridiem === "PM" && hours !== 12) hours += 12;
+  if (meridiem === "AM" && hours === 12) hours = 0;
+
+  const d = new Date(`${baseDateId}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return null;
+
+  d.setHours(hours, minutes, 0, 0);
+  return d;
+}
+
 const SelectDateTimeScreen: React.FC<Props> = ({ navigation }) => {
   const setSchedule = useCartStore((s) => s.setSchedule);
   const existingSchedule = useCartStore((s) => s.schedule);
@@ -41,20 +63,45 @@ const SelectDateTimeScreen: React.FC<Props> = ({ navigation }) => {
 
   const selectedDate = DATE_PILLS.find((d) => d.id === selectedDateId);
 
-  const loadSlots = useCallback(async (dateId: string) => {
-    if (!dateId) {
-      setSlots([]);
-      return;
-    }
-    setSlotsLoading(true);
-    try {
-      const list = await fetchSlotsFromApi(dateId);
-      setSlots(list);
-      setSelectedSlot((prev) => (list.includes(prev) ? prev : list[0] ?? ""));
-    } finally {
-      setSlotsLoading(false);
-    }
-  }, []);
+  const loadSlots = useCallback(
+    async (dateId: string) => {
+      if (!dateId) {
+        setSlots([]);
+        setSelectedSlot("");
+        return;
+      }
+      setSlotsLoading(true);
+      try {
+        const list = await fetchSlotsFromApi(dateId);
+
+        const today = new Date();
+        const todayId = today.toISOString().slice(0, 10); // YYYY-MM-DD
+        const isToday = dateId === todayId;
+
+        let filtered = list;
+        if (isToday && list.length) {
+          const nowTs = Date.now();
+          filtered = list.filter((slot) => {
+            const slotDate = parseSlotToDate(dateId, slot);
+            if (!slotDate) return true; // if parsing fails, keep the slot
+            return slotDate.getTime() > nowTs;
+          });
+        }
+
+        setSlots(filtered);
+        setSelectedSlot((prev) =>
+          filtered.includes(prev) ? prev : filtered[0] ?? ""
+        );
+      } catch (e) {
+        console.error("Error fetching time slots:", e);
+        setSlots([]);
+        setSelectedSlot("");
+      } finally {
+        setSlotsLoading(false);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     loadSlots(selectedDateId);

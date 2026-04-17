@@ -199,9 +199,20 @@ const handleStartVisit = async () => {
 
 const handleCloseVisit = async () => {
   if (!caseData.value?.id) return
+
+  // Use the latest note from the Notes section as the required closing note
+  const notes = caseData.value.notes || []
+  const latest = notes[notes.length - 1]
+  const noteText = (latest && (latest as any).text) ? String((latest as any).text).trim() : ''
+
+  if (!noteText) {
+    toast.error('Please add a note in the Notes section before completing the visit.')
+    return
+  }
+
   actionLoading.value = 'close'
   try {
-    await visitsStore.closeCase(caseData.value.id)
+    await visitsStore.closeCase(caseData.value.id, noteText)
     toast.success('Visit closed successfully')
     await fetchVisitData()
   } finally {

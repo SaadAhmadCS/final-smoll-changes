@@ -51,6 +51,10 @@ export class OrderItemDto {
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }
 
 export class OrderScheduleDto {

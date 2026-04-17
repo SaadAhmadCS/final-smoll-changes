@@ -311,12 +311,12 @@
 <script setup lang="ts">
 import { useVetVisitsStore } from '@/stores/vet-visits'
 import type { Visit, VisitStatus } from '@/stores/types/vet-types'
-import { useVeterniansStore } from '@/stores/veternians'
+import { useHomeVetsStore } from '@/stores/homeVets'
 import dayjs from 'dayjs'
 import { computed, onMounted, ref } from 'vue'
 
 const vetVisitsStore = useVetVisitsStore()
-const vetStore = useVeterniansStore()
+const homeVetsStore = useHomeVetsStore()
 
 const cases = ref<Visit[]>([])
 const loading = ref(true)
@@ -457,7 +457,7 @@ const fetchCases = async () => {
 
 onMounted(async () => {
   await fetchCases()
-  const list = await vetStore.fetchVets(false)
+  const list = await homeVetsStore.fetchHomeVets(false)
   vets.value = list?.data || list || []
 })
 

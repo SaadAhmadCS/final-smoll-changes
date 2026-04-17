@@ -25,4 +25,17 @@ export class UpdateConfigDto {
   @IsArray()
   @IsString({ each: true })
   homeServiceDaysOff?: string[];
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Per-date overrides for home service slots, keyed by YYYY-MM-DD. If a date is present here, its slots replace the default homeServiceSlots for that date.',
+    type: 'object',
+    additionalProperties: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+  })
+  @IsOptional()
+  homeServiceOverrides?: Record<string, string[]>;
 }
