@@ -27,8 +27,8 @@ export class AuthVetController {
       sameSite: (isProduction ? undefined : 'lax') as 'lax' | 'strict' | 'none' | undefined,
     };
 
-    res.cookie('sfAccessToken', accessToken, cookieOpts);
-    res.cookie('sfRefreshToken', refreshToken, {
+    res.cookie('sfVetAccessToken', accessToken, cookieOpts);
+    res.cookie('sfVetRefreshToken', refreshToken, {
       ...cookieOpts,
       maxAge: 1000 * 60 * 60 * 24 * 30,
     });
@@ -47,11 +47,11 @@ export class AuthVetController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.cookies['sfRefreshToken'];
+    const refreshToken = req.cookies['sfVetRefreshToken'];
     const { accessToken, zegoToken } =
       await this.authService.refreshToken(refreshToken);
 
-    res.cookie('sfAccessToken', accessToken, {
+    res.cookie('sfVetAccessToken', accessToken, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24,
     });
@@ -61,8 +61,8 @@ export class AuthVetController {
 
   @Post('/logout')
   async logout(@Res({ passthrough: true }) res: Response): Promise<void> {
-    res.clearCookie('sfAccessToken');
-    res.clearCookie('sfRefreshToken');
+    res.clearCookie('sfVetAccessToken');
+    res.clearCookie('sfVetRefreshToken');
     res.clearCookie('sfZegoToken');
   }
 }

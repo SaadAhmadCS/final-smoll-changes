@@ -12,6 +12,16 @@ const api = axios.create({
   withCredentials: true
 })
 
+api.interceptors.request.use((config) => {
+  const url = config.url || ''
+  if (url.startsWith('/vet') || url.startsWith('vet')) {
+    config.headers['x-app-role'] = 'vet'
+  } else {
+    config.headers['x-app-role'] = 'admin'
+  }
+  return config
+})
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {

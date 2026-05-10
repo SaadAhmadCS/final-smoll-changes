@@ -23,7 +23,17 @@ export class JWTStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         ExtractJwt.fromAuthHeaderAsBearerToken(),
-        (request) => request?.cookies?.sfAccessToken,
+        (request) => {
+          const role = request?.headers?.['x-app-role'];
+          if (role === 'admin') return request?.cookies?.sfAdminAccessToken;
+          if (role === 'vet') return request?.cookies?.sfVetAccessToken;
+          
+          return (
+            request?.cookies?.sfAccessToken ||
+            request?.cookies?.sfAdminAccessToken ||
+            request?.cookies?.sfVetAccessToken
+          );
+        },
       ]),
       ignoreExpiration: false,
       secretOrKey: configService.get('JWT_SECRET'),

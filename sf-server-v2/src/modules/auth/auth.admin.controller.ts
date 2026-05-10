@@ -34,13 +34,13 @@ export class AuthAdminController {
 
     const isProduction = process.env.ENVIRONMENT === 'production';
 
-    res.cookie('sfAccessToken', accessToken, {
+    res.cookie('sfAdminAccessToken', accessToken, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24,
       secure: isProduction,
       sameSite: !isProduction ? 'lax' : undefined,
     });
-    res.cookie('sfRefreshToken', refreshToken, {
+    res.cookie('sfAdminRefreshToken', refreshToken, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24,
       secure: isProduction,
@@ -53,11 +53,11 @@ export class AuthAdminController {
   @Post('/logout')
   async logout(@Res({ passthrough: true }) res: Response): Promise<void> {
     const isProduction = process.env.ENVIRONMENT === 'production';
-    res.clearCookie('sfAccessToken', {
+    res.clearCookie('sfAdminAccessToken', {
       httpOnly: true,
       secure: isProduction,
     });
-    res.clearCookie('sfRefreshToken', {
+    res.clearCookie('sfAdminRefreshToken', {
       httpOnly: true,
       secure: isProduction,
     });
