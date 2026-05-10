@@ -116,9 +116,9 @@ export class VerifyService {
     const isProduction = this.configService.get('ENVIRONMENT') === 'production';
     const isDevTestEmail =
       !isProduction &&
-      (email === TEST_ADMIN_EMAIL || email === TEST_MEMBER_EMAIL || email === 'saadahmadcs@yahoo.com');
+      (email === TEST_ADMIN_EMAIL || email === TEST_MEMBER_EMAIL);
     if (isDevTestEmail) {
-      const code = email === 'saadahmadcs@yahoo.com' ? '1234' : this.generateVerificationCode();
+      const code = this.generateVerificationCode();
       this.devTestAdminOtps.set(email, {
         code,
         expiresAt: Date.now() + DEV_OTP_TTL_MS,
@@ -152,7 +152,7 @@ export class VerifyService {
     const isProduction = this.configService.get('ENVIRONMENT') === 'production';
     const isDevTestEmail =
       !isProduction &&
-      (email === TEST_ADMIN_EMAIL || email === TEST_MEMBER_EMAIL || email === 'saadahmadcs@yahoo.com');
+      (email === TEST_ADMIN_EMAIL || email === TEST_MEMBER_EMAIL);
     if (isDevTestEmail) {
       const stored = this.devTestAdminOtps.get(email);
       if (!stored) {
